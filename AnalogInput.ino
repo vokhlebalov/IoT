@@ -5,6 +5,7 @@
 const int CONNECTED_VALUE = 0/*695*//*1023*/; // Аналоговое значение, при котором счетчик подключен
 const int METER_PIN = A0; // Пин для счетчика
 const int GEAR_RATIO = 2000; // Передаточное число счетчика
+const int IMPULSE_RATIO = 50; // Допустимое количество аналоговых значений, не равных значению подключения, при котором прерываение считается импульсом
 const int CONNECTION_TIME = 200; // Время проверки подключения к счетчику
 
 int sensorValue = 0;  // variable to store the value coming from the sensor
@@ -26,7 +27,7 @@ int getImpulse() {
     int msCounter = 0;
     delay(CONNECTION_TIME);
 
-    for (int i = 0; i < 200; i++) {
+    for (int i = 0; i < CONNECTION_TIME; i++) {
       sensorValue = analogRead(METER_PIN);
       if (sensorValue != CONNECTED_VALUE) {
         msCounter++;
@@ -34,13 +35,12 @@ int getImpulse() {
       delay(1);
     }
 
-    if (msCounter < 5) {
+    if (msCounter < IMPULSE_RATIO) {
       impulseValue = 1;
     } else { 
       connectionTimeMs = 0;
     }   
   } 
-  delay(2);
 
   return impulseValue;
 }
@@ -66,11 +66,7 @@ void output(int impulseValue) {
   }
 }
 
-void setup() {
-  Serial.begin(9600);
-
-  setConnection();
-
+void setAnalogConnection() {
   Serial.println("Checking for the power meter connection...");
 
   // Стартовый прогон для проверки подключения
@@ -85,9 +81,4 @@ void setup() {
     Serial.println("Power meter connected");
     meterConnected = true;
   }
-}
-
-void loop() {
-  int impulseValue = getImpulse();
-  output(impulseValue);
 }

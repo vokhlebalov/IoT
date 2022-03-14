@@ -36,7 +36,7 @@ const char clientID[] = "someClient123";
 const char outTopic[] = "mega_1/temp";
 const char inTopic[] = "mega_1/temp";
 
-bool setConnection() {
+bool setMQTTConnection() {
   // start the Ethernet connection:
   Serial.println("Initialize Ethernet with DHCP:");
   if (Ethernet.begin(mac) == 0) {
