@@ -1,3 +1,7 @@
+#include <SPI.h>
+#include <Ethernet.h>
+#include <PubSubClient.h>
+
 const int CONNECTED_VALUE = 0/*695*//*1023*/; // Аналоговое значение, при котором счетчик подключен
 const int METER_PIN = A0; // Пин для счетчика
 const int GEAR_RATIO = 2000; // Передаточное число счетчика
@@ -60,11 +64,12 @@ void output(int impulseValue) {
     impulseDetected = false;
     meterConnected = false;
   }
-
 }
 
 void setup() {
   Serial.begin(9600);
+
+  setConnection();
 
   Serial.println("Checking for the power meter connection...");
 

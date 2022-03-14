@@ -35,13 +35,8 @@ PubSubClient mqttClient(ethClient);
 const char clientID[] = "someClient123";
 const char outTopic[] = "mega_1/temp";
 const char inTopic[] = "mega_1/temp";
-long lastReconnectAttempt = 0;
 
-void setup() {
-  
-  // Useful for debugging purposes
-  Serial.begin(9600);
-  
+bool setConnection() {
   // start the Ethernet connection:
   Serial.println("Initialize Ethernet with DHCP:");
   if (Ethernet.begin(mac) == 0) {
@@ -82,49 +77,6 @@ void setup() {
   {
     Serial.println("Looks like the server connection failed...");
   }
-
-  lastReconnectAttempt = 0;
-}
-
-void loop() {
-
-//  if (!client.connected()) {
-//    
-//  }
-  
-  // This is needed at the top of the loop!
-  mqttClient.loop();
- 
-  // Ensure that we are subscribed to the topic "MakerIOTopic"
-  mqttClient.subscribe("mega_1/temp");
-
-  String buf = String(random(1, 250));
-  int bufLength = buf.length() + 1;
-  char data[bufLength];
-  buf.toCharArray(data, bufLength);
- 
-  // Attempt to publish a value to the topic "MakerIOTopic"
-  if(mqttClient.publish("mega_1/temp", data))
-  {
-    Serial.println("Publish message success");
-  }
-  else
-  {
-    Serial.println("Could not send message :(");
-  }
- 
-  // Dont overload the server!
-  delay(1000);
-}
-
-void reconnect() {
-  if (mqttClient.connect("arduinoClient")) {
-    // Once connected, publish an announcement...
-    mqttClient.publish(outTopic,"hello world");
-    // ... and resubscribe
-    mqttClient.subscribe(inTopic);
-  }
-//  return mqttClient.connected();
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
