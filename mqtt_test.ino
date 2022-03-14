@@ -1,18 +1,3 @@
-#include <SPI.h>
-#include <Ethernet.h>
-#include <PubSubClient.h>
-
-/*
-  TODO
-  1. Добавить переподключение клиента при ошибке подключения
-  2. Выделить генерацию данных в отдельную функцию
-  3. Добавить дополнительные переменные для отправки
-  4. 
-  
-*/
-
-// Function prototypes
-//void subscribeReceive(char* topic, byte* payload, unsigned int length);
 void callback(char* topic, byte* payload, unsigned int length);
 void reconnect();
 
@@ -28,13 +13,26 @@ const char* server = "82.148.31.128";
 //test.mosquitto.org
 // 82.148.31.128
 
-// Ethernet and MQTT related objects
-EthernetClient ethClient;
-PubSubClient mqttClient(ethClient);
-
 const char clientID[] = "someClient123";
 const char outTopic[] = "mega_1/temp";
 const char inTopic[] = "mega_1/temp";
+
+void publish(double value, const char topic[]) {
+  
+  String buf = String(value);
+  int bufLength = buf.length() + 1;
+  char data[bufLength];
+  buf.toCharArray(data, bufLength);
+
+  if(mqttClient.publish(topic, data))
+  {
+    Serial.println("Publish message success");
+  }
+  else
+  {
+    Serial.println("Could not send message :(");
+  }
+}
 
 bool setMQTTConnection() {
   // start the Ethernet connection:
@@ -88,20 +86,3 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 }
-
-//void subscribeReceive(char* topic, byte* payload, unsigned int length)
-//{
-//  // Print the topic
-//  Serial.print("Topic: ");
-//  Serial.println(topic);
-// 
-//  // Print the message
-//  Serial.print("Message: ");
-//  for(int i = 0; i < length; i ++)
-//  {
-//    Serial.print(char(payload[i]));
-//  }
-// 
-//  // Print a newline
-//  Serial.println("");
-//}
