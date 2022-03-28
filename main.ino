@@ -13,7 +13,7 @@ double minuteConsumption = 0.0;
 double quarterHourConsumption = 0.0;
 double hourConsumption = 0.0;
 double dayConsumption = 0.0;
-double totalConsumption = 0.0;
+double totalConsumption = 3888.0;
 
 const char minuteTopic[] = "mega_1/minuteConsumption";
 const char quarterHourTopic[] = "mega_1/quarterHourConsumption";
@@ -63,6 +63,27 @@ void impulseOutPut(int impulseValue) {
 void getConsumption() {
   RtcDateTime now = Rtc.GetDateTime();
   totalSeconds = calculateTotalSeconds(startTime, now);
+  if (totalSeconds % DAY == 0) {
+    dayConsumption = getPowerConsumption(dayImpulseCounter);
+    // Отправка потребления за день
+    Serial.print("day consumption: "); Serial.print(dayConsumption); Serial.println(" W/h");
+    publish(dayConsumption, dayTopic);
+    dayImpulseCounter = 0;
+  }
+  if (totalSeconds % HOUR == 0) {
+    hourConsumption = getPowerConsumption(hourImpulseCounter);
+    // Отправка потребления за час
+    Serial.print("hour consumption: "); Serial.print(hourConsumption); Serial.println(" W/h");
+    publish(hourConsumption, hourTopic);
+    hourImpulseCounter = 0;
+  }
+  if (totalSeconds % QUARTER_HOUR == 0) {
+    quarterHourConsumption = getPowerConsumption(quarterHourImpulseCounter);
+    // Отправка потребления за четвереть часа 
+    Serial.print("quarter hour consumption: "); Serial.print(quarterHourConsumption); Serial.println(" W/h");
+    publish(quarterHourConsumption, quarterHourTopic);
+    quarterHourImpulseCounter = 0;
+  }
   if (totalSeconds % MINUTE == 0) {
     minuteConsumption = getPowerConsumption(minuteImpulseCounter);
     totalConsumption = getPowerConsumption(impulseCounter);
@@ -73,43 +94,20 @@ void getConsumption() {
     minuteImpulseCounter = 0;
     delay(1000);
   }
-  if (totalSeconds % QUARTER_HOUR == 0) {
-    quarterHourConsumption = getPowerConsumption(quarterHourImpulseCounter);
-    // Отправка потребления за четвереть часа 
-    Serial.print("quarter hour consumption: "); Serial.print(quarterHourConsumption); Serial.println(" W/h");
-    publish(quarterHourConsumption, quarterHourTopic);
-    quarterHourImpulseCounter = 0;
-  }
-  if (totalSeconds % HOUR == 0) {
-    hourConsumption = getPowerConsumption(hourImpulseCounter);
-    // Отправка потребления за час
-    Serial.print("hour consumption: "); Serial.print(hourConsumption); Serial.println(" W/h");
-    publish(hourConsumption, hourTopic);
-    hourImpulseCounter = 0;
-  }
-  if (totalSeconds % DAY == 0) {
-    dayConsumption = getPowerConsumption(dayImpulseCounter);
-    // Отправка потребления за день
-    Serial.print("day consumption: "); Serial.print(dayConsumption); Serial.println(" W/h");
-    publish(dayConsumption, dayTopic);
-    dayImpulseCounter = 0;
-  }
 }
 
 void setup() {
   Serial.begin(9600);
   setTime();
   setMQTTConnection();
-  setAnalogConnection();
+  setAnalogConnection();  
 }
 
 void loop() {
   // This is needed at the top of the loop!
   mqttClient.loop();
 
-  
-
-  getConsumption();
   int impulseValue = getImpulse();
   impulseOutPut(impulseValue);
+  getConsumption();
 }

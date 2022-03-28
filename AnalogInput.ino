@@ -41,8 +41,8 @@ bool meterConnected = false;
 bool impulseDetected = false;
 
 int getImpulse() {
-  int impulseValue = -1;
   sensorValue = analogRead(METER_PIN);
+  int impulseValue = -1;
 
   if (sensorValue == CONNECTED_VALUE) {
     connectionTimeMs++;
@@ -52,18 +52,18 @@ int getImpulse() {
     }
   } else if (connectionTimeMs > CONNECTION_TIME) {
     int msCounter = 0;
-    delay(CONNECTION_TIME);
+    delay(300);
 
     for (int i = 0; i < CONNECTION_TIME; i++) {
       sensorValue = analogRead(METER_PIN);
       if (sensorValue != CONNECTED_VALUE) {
         msCounter++;
       }
-      delay(1);
     }
 
     if (msCounter < IMPULSE_RATIO) {
       impulseValue = 1;
+      connectionTimeMs = CONNECTION_TIME + 1;
     } else { 
       connectionTimeMs = 0;
     }   
